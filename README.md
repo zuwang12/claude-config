@@ -55,10 +55,27 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/zuwang12/claude-config/
 @~/claude-config/CLAUDE.md
 ```
 
-여는 방법:
+방법 세 가지. 편한 것을 쓴다.
 
-- **`/memory`** — Claude Code 세션 안에서 실행. 목록에서 고르면 에디터로 열리고, 파일이 없으면 만들어 준다. 경로 오타 위험이 없어 가장 안전하다.
-- 또는 직접: `mkdir -p ~/.claude && nano ~/.claude/CLAUDE.md`
+**① Claude에게 시키기 (가장 간단).** 그 기계의 세션에서:
+
+> `~/.claude/CLAUDE.md` 열어서 `@~/claude-config/CLAUDE.md` 한 줄 추가해줘 (기존 내용은 그대로 두고)
+
+**② 셸 한 줄.** `>>`(추가)라 덮어쓰지 않고, 이미 있으면 중복 추가도 안 한다:
+
+```bash
+mkdir -p ~/.claude && grep -qxF '@~/claude-config/CLAUDE.md' ~/.claude/CLAUDE.md 2>/dev/null || printf '\n@~/claude-config/CLAUDE.md\n' >> ~/.claude/CLAUDE.md
+```
+
+Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force $HOME\.claude | Out-Null; if (-not (Select-String -Path $HOME\.claude\CLAUDE.md -Pattern '^@~/claude-config/CLAUDE\.md$' -Quiet -ErrorAction SilentlyContinue)) { Add-Content $HOME\.claude\CLAUDE.md "`n@~/claude-config/CLAUDE.md" }
+```
+
+**③ 에디터로 직접.** `nano ~/.claude/CLAUDE.md` 등.
+
+> `/memory` 는 터미널 CLI 전용이다. **데스크톱 앱에는 없다.**
 
 파일이 없으면 이 줄만, 있으면 기존 내용은 두고 맨 위나 맨 아래에 덧붙인다.
 위치는 로드 순서만 정한다(먼저 읽히길 원하면 위).
