@@ -95,7 +95,7 @@ New-Item -ItemType Directory -Force $HOME\.claude | Out-Null; if (-not (Select-S
 ### 설치 확인
 
 세션을 열고 `/context`를 실행해 **Memory files**에 `CLAUDE.md`가 뜨는지 본다.
-안 뜨면 `/memory`로 `~/.claude/CLAUDE.md`를 열어 경로를 확인한다.
+안 뜨면 `~/.claude/CLAUDE.md`를 직접 열어 `@` 줄의 경로를 확인한다.
 
 `claude-api` 스킬이 그 기계에 있는지도 확인한다 — 세션에서 스킬 목록에 `claude-api`가
 보이면 된다. 없으면 `CLAUDE.md`의 규칙이 "추천 생략"으로 안전하게 빠지도록 되어 있다.
