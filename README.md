@@ -7,7 +7,7 @@
 | 회사 | Windows | 로컬 |
 | ubuntu-b | Ubuntu | 서버 |
 | mac-c | macOS | 로컬 |
-| srv-a | Ubuntu | LG CNS |
+| srv-a | Ubuntu | 사내망 |
 
 ## 설계 원칙
 
@@ -25,22 +25,55 @@
 
 ## 설치 (4대 공통)
 
-심볼릭 링크는 Windows에서 관리자 권한이나 개발자 모드가 필요하다.
-**import 방식은 OS를 안 가리므로 4대 모두 같은 절차를 쓴다.**
+public 리포이므로 **인증이 필요 없다.** 토큰도 `gh`도 SSH 키도 쓰지 않는다.
+
+### 1단계 — 파일 받기
 
 ```bash
-git clone <이 리포 URL> ~/claude-config
-mkdir -p ~/.claude
-printf '@~/claude-config/CLAUDE.md\n' > ~/.claude/CLAUDE.md
+mkdir -p ~/claude-config
+curl -fsSL https://raw.githubusercontent.com/zuwang12/claude-config/main/CLAUDE.md \
+  -o ~/claude-config/CLAUDE.md
 ```
 
 Windows PowerShell:
 
 ```powershell
-git clone <이 리포 URL> $HOME\claude-config
-New-Item -ItemType Directory -Force $HOME\.claude | Out-Null
-Set-Content -Path $HOME\.claude\CLAUDE.md -Value '@~/claude-config/CLAUDE.md' -NoNewline
+New-Item -ItemType Directory -Force $HOME\claude-config | Out-Null
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/zuwang12/claude-config/main/CLAUDE.md `
+  -OutFile $HOME\claude-config\CLAUDE.md
 ```
+
+`git`이 있으면 `git clone https://github.com/zuwang12/claude-config.git ~/claude-config` 도 된다.
+갱신 이력을 보고 싶을 때만 git을 쓰고, 평소엔 curl 한 줄이 간단하다.
+
+### 2단계 — import 한 줄 추가
+
+**리다이렉션(`>`)으로 덮어쓰지 말 것.** 그 기계에 기존 `~/.claude/CLAUDE.md`가 있으면 날아간다.
+에디터로 열어서 아래 한 줄을 **추가**한다.
+
+```
+@~/claude-config/CLAUDE.md
+```
+
+여는 방법:
+
+- **`/memory`** — Claude Code 세션 안에서 실행. 목록에서 고르면 에디터로 열리고, 파일이 없으면 만들어 준다. 경로 오타 위험이 없어 가장 안전하다.
+- 또는 직접: `mkdir -p ~/.claude && nano ~/.claude/CLAUDE.md`
+
+파일이 없으면 이 줄만, 있으면 기존 내용은 두고 맨 위나 맨 아래에 덧붙인다.
+위치는 로드 순서만 정한다(먼저 읽히길 원하면 위).
+
+### 3단계 — 확인
+
+새 세션에서 `/context` → **Memory files**의 토큰 수를 본다.
+
+| 값 | 판정 |
+|---|---|
+| ~4k | ✅ import 성공 |
+| ~10 미만 | ❌ 실패 — `@` 뒤를 절대경로로 교체 (`@/home/<사용자명>/claude-config/CLAUDE.md`) |
+
+또는 세션에서 물어본다: **"내 CLAUDE.md에 모델·노력·속도 추천 규칙 있어?"**
+트리거 조건을 답하면 성공이다.
 
 ### 설치 확인
 
@@ -52,13 +85,20 @@ Set-Content -Path $HOME\.claude\CLAUDE.md -Value '@~/claude-config/CLAUDE.md' -N
 
 ## 갱신
 
+**설치 1단계의 curl을 그대로 다시 실행하면 된다.** 덮어쓰기가 곧 갱신이다.
+
 ```bash
-git -C ~/claude-config pull
+curl -fsSL https://raw.githubusercontent.com/zuwang12/claude-config/main/CLAUDE.md \
+  -o ~/claude-config/CLAUDE.md
 ```
 
-다음 세션부터 반영된다. 자동화하려면 `SessionStart` 훅으로 `git pull`을 걸 수 있으나,
-**srv-a(LG CNS)처럼 외부 git 접근이 막힌 환경에서는 세션 시작이 지연되거나 실패할 수 있다.**
-4대 중 한 곳이라도 GitHub 접근이 막히면 수동 `pull`을 권한다.
+clone 해 둔 기계라면 `git -C ~/claude-config pull` 도 같다.
+(`git -C <경로>`는 그 디렉토리로 `cd` 한 것처럼 실행하되 현재 위치는 바꾸지 않는다.)
+
+다음 세션부터 반영된다. 자동화하려면 `SessionStart` 훅에 걸 수 있으나,
+**사내망 서버처럼 외부 접근이 막힌 환경에서는 세션 시작이 지연되거나 실패할 수 있다.**
+4대 중 한 곳이라도 GitHub 접근이 막히면 수동 갱신을 권한다.
+raw.githubusercontent.com 도 막혀 있으면 파일 하나뿐이니 복사해 붙여넣어도 된다.
 
 ## 수정할 때
 
