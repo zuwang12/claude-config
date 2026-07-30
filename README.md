@@ -17,6 +17,8 @@
 |---|---|---|
 | 모델 ID·가격·컨텍스트·effort 권장·fast 지원 | `claude-api` 스킬 | **자동** — Claude Code에 번들되어 앱과 함께 갱신 |
 | 판단 절차·작업 프로토콜·조사 규율 | 이 리포 (`CLAUDE.md`) | `git pull` |
+| 노션 적재 방법론 | `notion-sync` 스킬 (이 리포) | `git pull` 또는 curl 재실행 |
+| 노션 페이지 id·프로젝트 경로 | 프로젝트의 `notion_pages.json` | 동기화하지 않음 (프로젝트 로컬) |
 | auto memory·인증·`settings.local.json` | 각 기계 | 동기화하지 않음 (설계상 machine-local) |
 
 `CLAUDE.md`에 모델 표를 **넣지 않는다.** 정적 표는 낡는다 — 실제로 이전 버전의
@@ -79,6 +81,28 @@ New-Item -ItemType Directory -Force $HOME\.claude | Out-Null; if (-not (Select-S
 
 파일이 없으면 이 줄만, 있으면 기존 내용은 두고 맨 위나 맨 아래에 덧붙인다.
 위치는 로드 순서만 정한다(먼저 읽히길 원하면 위).
+
+### 2-5단계 — 스킬·도구 받기 (노션 작업을 하는 기계만)
+
+`CLAUDE.md`는 노션 규칙의 **트리거만** 담는다. 본문은 스킬로 분리해 뒀다 —
+노션과 무관한 세션에서 토큰을 태우지 않기 위해서다(`claude-api`를 다룬 방식과 같다).
+
+```bash
+mkdir -p ~/.claude/skills/notion-sync
+curl -fsSL https://raw.githubusercontent.com/zuwang12/claude-config/main/skills/notion-sync/SKILL.md \
+  -o ~/.claude/skills/notion-sync/SKILL.md
+```
+
+clone 해 둔 기계라면 심볼릭 링크가 낫다 — `git pull` 하면 즉시 반영된다:
+
+```bash
+mkdir -p ~/.claude/skills && ln -sfn ~/claude-config/skills/notion-sync ~/.claude/skills/notion-sync
+```
+
+도구(`tools/notion_page.py`)는 clone 한 기계면 이미 있다. curl로 받은 기계는 필요할 때 받는다.
+
+**페이지 id는 이 리포에 넣지 않는다.** 프로젝트 디렉터리에 `notion_pages.json`을 두고
+스크립트가 그걸 읽는다(`.gitignore`에 등록돼 있다).
 
 ### 3단계 — 확인
 

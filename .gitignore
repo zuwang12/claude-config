@@ -1,3 +1,10 @@
 # 기계별 로컬 항목은 커밋하지 않는다
 *.bak
 .DS_Store
+__pycache__/
+*.pyc
+
+# 공개 리포다 — 아래는 절대 커밋하지 않는다
+*token*
+*.env
+notion_pages.json

@@ -1,0 +1,20 @@
+#!/bin/sh
+# 공개 리포 안전장치: 판단이 아니라 패턴으로 막는다.
+# 설치: git config core.hooksPath .githooks
+fail=0
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+hit() { echo "✋ 커밋 차단 — $1"; echo "$2"; fail=1; }
+
+t=$(git diff --cached -U0 -- $staged | grep -E "^\+" | grep -oE "ntn_[A-Za-z0-9]{10,}|secret_[A-Za-z0-9]{10,}|ghp_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}")
+[ -n "$t" ] && hit "토큰으로 보이는 문자열" "$t"
+
+h=$(git diff --cached -U0 -- $staged | grep -E "^\+" | grep -oE "\b[0-9a-f]{32}\b")
+[ -n "$h" ] && hit "노션 페이지/DB id로 보이는 32자 hex" "$h"
+
+p=$(git diff --cached -U0 -- $staged | grep -E "^\+" | grep -oE "/home/[a-z0-9_-]+/|/mnt/[A-Za-z]/[A-Za-z0-9_-]+/")
+[ -n "$p" ] && hit "개인 절대경로" "$(echo "$p" | sort -u)"
+
+[ $fail -eq 1 ] && echo "" && echo "의도한 것이면: git commit --no-verify"
+exit $fail
