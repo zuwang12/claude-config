@@ -33,6 +33,18 @@ python이 파일을 읽어 HTTP로 보내면 **바이트가 그대로** 가서 �
 ### 세팅 (기계마다 1회)
 
 - 토큰: `~/.notion_token` (권한 600). **값을 대화창에 출력하거나 붙여넣지 말 것** — 트랜스크립트에 평문으로 남는다. 노출됐다면 즉시 Regenerate.
+
+**★ 토큰을 파일에 넣는 안전한 방법.** 화면에도 셸 히스토리에도 값이 남지 않는다.
+
+```bash
+umask 077
+printf '토큰 붙여넣고 Enter (화면에 안 보임): '; read -rs TOK; echo
+printf '%s' "$TOK" > ~/.notion_token; unset TOK; chmod 600 ~/.notion_token
+```
+
+`read`에 **`-s`가 반드시 있어야 한다.** 2026-07-30에 `-s` 없이 안내했다가 입력값이 화면에 그대로 찍혔고, 사용자가 그 화면을 복사해 붙여넣으면서 토큰이 대화 기록에 평문으로 남아 재발급해야 했다.
+
+**클립보드 함정도 있다.** `pbpaste > ~/.notion_token`(macOS)를 안내하면, 사용자가 그 명령어를 복사하는 순간 클립보드가 덮여서 토큰 대신 **명령어 텍스트가 파일에 들어간다.** 같은 날 세 번 반복됐다. 클립보드 경유를 안내하지 말고 위 `read -rs` 방식을 쓰거나, 이미 정상 동작하는 기계가 있으면 `scp`로 파일을 그대로 옮긴다.
 - Notion 통합을 만들고 **Access token** 방식을 쓴다(OAuth 아님 — 정적 토큰이라 스크립트·cron에 적합).
 - Capabilities: Read / Update / Insert content. User는 'No user information'.
 - **연결 범위는 가능한 최상위 페이지**에 건다 — 하위 전체가 상속된다.
@@ -128,6 +140,31 @@ H = {"Authorization": "Bearer " + tok,
 **연결 방법(사용자가 노션 UI에서 직접)**: 대상 페이지 열기 → 우측 상단 `···` → `Connections`/`연결`/`Add connections` 중 보이는 것 → 통합 검색 후 승인. 메뉴가 길면 끝까지 스크롤한다(버전마다 이름·위치가 다름).
 
 **진단**: `POST /v1/search`가 하위 항목만 뱉고 상위 페이지가 404면 연결이 하위에만 걸린 것이다. 상위에 다시 연결하면 전체가 열린다.
+
+### ★★ 인증 확인과 접근 확인은 다르다 — 반드시 대상 페이지로 검사할 것
+
+`GET /v1/users/me`가 200이어도 **원하는 페이지에 못 닿을 수 있다.** 그건 토큰이 살아 있다는 뜻일 뿐 연결 여부와 무관하다. 2026-07-30에 이걸로 '토큰 아직 유효'라고 보고했다가, 실제로는 대상 페이지가 전부 404인 상태였다. 그 오진 때문에 사용자가 토큰을 재발급하고 여러 번 다시 넣는 헛수고를 했다. **원인은 처음부터 토큰이 아니라 연결이었다.**
+
+토큰을 바꾸거나 통합을 바꾼 뒤에는 **실제로 쓸 페이지·DB에 GET을 날려** 확인한다.
+
+```python
+import os, urllib.request, urllib.error
+t = open(os.path.expanduser('~/.notion_token')).read().strip()
+H = {'Authorization': 'Bearer ' + t, 'Notion-Version': '2022-06-28'}
+TARGETS = [('pages', '<page_id>', '최상위 페이지'),
+           ('databases', '<db_id>', '대상 DB')]     # 프로젝트 notion_pages.json 에서 가져온다
+for kind, pid, name in TARGETS:
+    try:
+        urllib.request.urlopen(urllib.request.Request(
+            'https://api.notion.com/v1/%s/%s' % (kind, pid), headers=H))
+        print('OK  ', name)
+    except urllib.error.HTTPError as e:
+        print('FAIL', name, e.code)      # 404 = 연결 안 됨, 401 = 토큰 자체가 무효
+```
+
+**401과 404를 구분하라.** 401은 토큰 문자열이 잘못된 것(재발급·재입력), 404는 통합이 그 페이지에 연결되지 않은 것(노션 UI에서 연결)이다. **둘의 처방이 정반대**이므로 섞으면 엉뚱한 곳을 고치게 된다.
+
+그리고 **User capabilities를 'No user information'으로 두면 `/v1/users/me` 자체를 못 쓴다.** 권한을 최소로 주는 것이 맞으므로, 확인 수단으로 그걸 쓰지 말아야 할 이유가 하나 더 있다.
 
 ## 8. MCP 쿼터
 
