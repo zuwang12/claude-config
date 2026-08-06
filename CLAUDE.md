@@ -325,6 +325,40 @@ Archived 목록에서 다시 열 수 있고, 트랜스크립트와 메모리 파
 메모리 회수 효과는 세션당 약 400MB + 그 세션이 띄운 MCP 서버 몫이다.
 swap 없는 기계에서는 무시할 수준이 아니지만, **쿼터 절약 효과는 없다**(1절).
 
+### 4. 자동 감시 (훅)
+
+위 2절의 교체 시점을 사람이 매번 눈치채기 어렵다. 훅으로 감시한다.
+**훅은 셸에서 돌고 모델을 호출하지 않으므로 토큰 비용이 0이다.**
+세션 끝에 "정리해 줘"라고 하는 것이 가장 비싼 순간이므로, 상태를 작업 중에 미리 쌓아 둔다.
+
+| 이벤트 | 스크립트 (`snippets/hooks/`) | 하는 일 |
+|---|---|---|
+| `Stop` | `session-snapshot.sh` | 매 턴 끝에 branch·미커밋·미push를 파일로 기록 (`async: true`) |
+| `PreCompact` | `precompact-warn.sh` | compaction 직전에 "세션 교체 시점" 경고 + 미커밋 개수 |
+| `SessionStart` | `session-restore.sh` | 같은 디렉터리의 이전 상태를 컨텍스트로 주입 |
+
+상태 파일은 `~/.claude/session-state/<경로를 -로 치환>.txt`. git 저장소가 아니면 조용히 종료한다.
+
+**새 기계에 설치:**
+
+```bash
+mkdir -p ~/.claude/hooks
+for f in session-snapshot.sh precompact-warn.sh session-restore.sh; do
+  ln -sfn ~/claude-config/snippets/hooks/$f ~/.claude/hooks/$f
+done
+```
+
+그리고 그 기계의 `~/.claude/settings.json`에 `hooks` 키를 추가한다
+(`$HOME/.claude/hooks/<이름>.sh` 를 `type: "command"` 로 호출. 기존 설정과 **병합**할 것).
+
+⚠️ 주의:
+- **`jq`가 없는 기계가 있다.** 훅 예제 대부분이 jq를 쓰므로 `python3`로 대체했다.
+  이 기계의 python은 3.8이라 3.8 호환 문법만 쓴다.
+- 훅을 추가한 뒤에는 앱에서 **`/hooks` 를 한 번 열거나 세션을 재시작**해야 반영된다.
+  설정 감시자는 세션 시작 시점에 설정 파일이 있던 디렉터리만 본다.
+- `Stop`·`PreCompact`·`SessionStart`는 턴 밖에서 발생해 **그 자리에서 발화 검증이 불가능하다.**
+  파이프 테스트(`echo '{}' | <스크립트>`)로 명령 자체만 검증하고 넘어간다.
+
 ---
 
 ## 세션 시작 — 사용자가 "이어서" 라고만 하면
