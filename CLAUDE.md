@@ -146,6 +146,13 @@
 
 - **중복 노동**: 다른 세션이 같은 수정을 이미 커밋해 `git commit`이 "nothing to commit"으로
   끝난다. **세션 시작 시 `git log`·`git status`로 HEAD와 워킹트리를 먼저 확인하라.**
+- ⚠️ **`git status`만으로는 원격 이탈을 못 본다. `git fetch`가 먼저다.**
+  fetch 전의 `git status`는 낡은 로컬 `origin/main` ref를 기준으로 "up to date"라고
+  보고한다. 워킹트리가 깨끗해도 원격이 앞서 있으면 push가 거부된다(실제로 발생).
+  공유 리포를 건드리기 전에는 항상:
+  `git fetch -q && git rev-list --left-right --count HEAD...@{u}`
+  (출력이 `2  2` 면 양쪽이 갈라진 것이다. 병합 전에 `git branch -f backup-<날짜> HEAD`로
+  백업 ref를 만들고 rebase한다. 충돌하면 `git rebase --abort`로 되돌린다.)
 - **미커밋 수정 유실 위험**: 워킹트리에 남은 수정은 다른 세션이 덮어쓸 수 있다.
 - **자동화와의 충돌**: 큐 러너·감시 스크립트가 있으면 프로세스 kill을 "완료"로 오인해
   후속 작업을 조기 투입한다. 실행 중 프로세스를 죽이기 전에 감시자를 확인하라.
@@ -367,17 +374,17 @@ swap 없는 기계에서는 무시할 수준이 아니지만, **쿼터 절약 �
 
 상태 파일은 `~/.claude/session-state/<경로를 -로 치환>.txt`. git 저장소가 아니면 조용히 종료한다.
 
-**새 기계에 설치:**
+**새 기계에 설치** — 스크립트는 git으로 내려오지만 **등록은 기계마다 수동**이다.
+`~/.claude/`는 로컬이라 공유되지 않는다. 심볼릭 링크는 필요 없다.
+그 기계의 `~/.claude/settings.json`에 아래를 **병합**한다(기존 키를 지우지 말 것).
 
-```bash
-mkdir -p ~/.claude/hooks
-for f in session-snapshot.sh precompact-warn.sh session-restore.sh; do
-  ln -sfn ~/claude-config/snippets/hooks/$f ~/.claude/hooks/$f
-done
+```json
+"hooks": {
+  "Stop":         [{"hooks": [{"type": "command", "command": "$HOME/claude-config/snippets/hooks/session-snapshot.sh", "timeout": 10, "async": true}]}],
+  "PreCompact":   [{"hooks": [{"type": "command", "command": "$HOME/claude-config/snippets/hooks/precompact-warn.sh",  "timeout": 10}]}],
+  "SessionStart": [{"hooks": [{"type": "command", "command": "$HOME/claude-config/snippets/hooks/session-restore.sh",  "timeout": 10}]}]
+}
 ```
-
-그리고 그 기계의 `~/.claude/settings.json`에 `hooks` 키를 추가한다
-(`$HOME/.claude/hooks/<이름>.sh` 를 `type: "command"` 로 호출. 기존 설정과 **병합**할 것).
 
 ⚠️ 주의:
 - **`jq`가 없는 기계가 있다.** 훅 예제 대부분이 jq를 쓰므로 `python3`로 대체했다.
