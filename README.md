@@ -53,6 +53,34 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/zuwang12/claude-config/
 `git`이 있으면 `git clone https://github.com/zuwang12/claude-config.git ~/claude-config` 도 된다.
 갱신 이력을 보고 싶을 때만 git을 쓰고, 평소엔 curl 한 줄이 간단하다.
 
+### 1-5단계 — 커밋 가드 활성화 (clone 한 기계만)
+
+이 리포는 public이다. `.githooks/pre-commit`이 아래가 추가되면 커밋을 막는다.
+판단이 아니라 패턴으로 막는 장치다.
+
+- 토큰처럼 보이는 문자열 · 노션 id로 보이는 32자 hex · 개인 절대경로
+- **조직·프로젝트 식별자** (2026-08-13 추가 — 이 구멍으로 실제 유출이 났다)
+
+**훅 파일은 clone에 따라오지만 활성화는 따라오지 않는다.** `core.hooksPath`는 그 clone의
+로컬 설정이라 기계마다 한 번씩 켜 줘야 한다. 안 켜면 훅은 그냥 잠들어 있고 아무 경고도 없다
+(2026-07-30에 한 기계에서 미설정 상태로 발견됐다).
+
+```bash
+git -C ~/claude-config config core.hooksPath .githooks
+```
+
+확인 — `.githooks`가 출력되면 활성화된 것이다:
+
+```bash
+git -C ~/claude-config config --get core.hooksPath
+```
+
+**켰다고 믿지 말고 한 번 시험한다.** `.githooks/pre-commit`의 패턴에서 식별자 하나를 골라
+`README.md`에 넣고 커밋을 시도해 `✋ 커밋 차단`이 뜨는지 본다(확인 후 되돌린다).
+
+일부러 넣는 값이면 `git commit --no-verify`로 통과시킨다.
+curl로 받은 기계는 git 리포가 아니라 커밋할 일이 없으므로 이 단계는 건너뛴다.
+
 ### 2단계 — import 한 줄 추가
 
 **리다이렉션(`>`)으로 덮어쓰지 말 것.** 그 기계에 기존 `~/.claude/CLAUDE.md`가 있으면 날아간다.
@@ -171,6 +199,9 @@ stub 으로 간주하고 덮어쓰면 그 내용이 날아간다(53행이 같은
 $EDITOR ~/claude-config/CLAUDE.md
 git -C ~/claude-config commit -am "..." && git -C ~/claude-config push
 ```
+
+커밋이 `✋ 커밋 차단`으로 막히면 pre-commit 가드가 잡은 것이다 — 출력된 문자열을 지우고
+다시 커밋한다. 반대로 아무 검사도 안 걸리는 것 같으면 **설치 1-5단계를 안 한 기계**일 수 있다.
 
 `CLAUDE.md`는 **200줄 이하**로 유지한다. 길어지면 준수율이 떨어진다.
 주제별로 쪼갤 거면 `~/.claude/rules/`(사용자 스코프, 모든 프로젝트에 적용)를 쓰되,
