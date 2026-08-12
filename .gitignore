@@ -1,10 +1,36 @@
-# 기계별 로컬 항목은 커밋하지 않는다
-*.bak
-.DS_Store
-__pycache__/
-*.pyc
+# 화이트리스트 방식 — 전부 막고 필요한 것만 연다.
+#
+# 블랙리스트였을 때 새로 생긴 파일(_inbox.md)이 그대로 추적돼 공개 저장소로
+# 나갔다. 블랙리스트는 "무엇이 위험한지 미리 안다"를 전제하는데 그게 틀렸다.
+# 항목을 추가할 때는 되도록 확장자까지 좁힌다.
 
-# 공개 리포다 — 아래는 절대 커밋하지 않는다
+*
+
+!.gitignore
+!CLAUDE.md
+!README.md
+!install.sh
+
+!.githooks/
+!.githooks/*
+
+!docs/
+!docs/*.md
+
+!rules/
+!rules/*.md
+
+!skills/
+!skills/**
+
+!snippets/
+!snippets/**
+
+!tools/
+!tools/*.py
+
+# 위 화이트리스트(특히 재귀 허용한 skills/·snippets/)를 뚫고 들어올 수 있는
+# 것은 다시 막는다. 마지막에 일치하는 규칙이 이긴다.
 *token*
 *.env
 notion_pages.json
