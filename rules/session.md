@@ -90,16 +90,40 @@ swap 없는 기계에서는 무시할 수준이 아니지만, **쿼터 절약 �
 상태 파일은 `~/.claude/session-state/<경로를 -로 치환>.txt`. git 저장소가 아니면 조용히 종료한다.
 
 **새 기계에 설치** — 스크립트는 git으로 내려오지만 **등록은 기계마다 수동**이다.
-`~/.claude/`는 로컬이라 공유되지 않는다. 심볼릭 링크는 필요 없다.
-그 기계의 `~/.claude/settings.json`에 아래를 **병합**한다(기존 키를 지우지 말 것).
+`~/.claude/`는 로컬이라 공유되지 않는다.
+
+⚠️ **저장소 경로를 직접 가리키지 않는다. `~/.claude/hooks/` 로 복사해서 쓴다.**
+심볼릭 링크도 쓰지 않는다. 저장소를 가리키면 `pull` 하는 순간 **검토 없이 실행 코드가 바뀐다.**
+복사 방식이면 복사 시점에 검토가 한 번 들어가고, 그 검토가 유일한 방어선이다.
+
+1. 복사부터 한다. **설정을 먼저 바꾸면 그 사이 훅이 조용히 실패한다.**
+
+```bash
+mkdir -p ~/.claude/hooks && cp ~/claude-config/snippets/hooks/*.sh ~/.claude/hooks/ && chmod +x ~/.claude/hooks/*.sh
+```
+
+2. 복사본이 도는지 파이프로 확인한다(훅은 턴 밖에서 발화해 그 자리 검증이 안 된다).
+
+```bash
+for f in ~/.claude/hooks/*.sh; do echo '{}' | "$f" >/dev/null && echo "OK $f" || echo "FAIL $f"; done
+```
+
+3. 그 기계의 `~/.claude/settings.json`에 아래를 **병합**한다(기존 키를 지우지 말 것).
 
 ```json
 "hooks": {
-  "Stop":         [{"hooks": [{"type": "command", "command": "$HOME/claude-config/snippets/hooks/session-snapshot.sh", "timeout": 10, "async": true}]}],
-  "PreCompact":   [{"hooks": [{"type": "command", "command": "$HOME/claude-config/snippets/hooks/precompact-warn.sh",  "timeout": 10}]}],
-  "SessionStart": [{"hooks": [{"type": "command", "command": "$HOME/claude-config/snippets/hooks/session-restore.sh",  "timeout": 10}]}]
+  "Stop":         [{"hooks": [{"type": "command", "command": "$HOME/.claude/hooks/session-snapshot.sh", "timeout": 10, "async": true}]}],
+  "PreCompact":   [{"hooks": [{"type": "command", "command": "$HOME/.claude/hooks/precompact-warn.sh",  "timeout": 10}]}],
+  "SessionStart": [{"hooks": [{"type": "command", "command": "$HOME/.claude/hooks/session-restore.sh",  "timeout": 10}]}]
 }
 ```
+
+**갱신할 때도 같다.** `pull` 후 `snippets/hooks/` 의 diff 를 먼저 읽고, 납득한 뒤에 다시 복사한다.
+복사를 잊으면 옛 버전이 계속 돈다 — 저장소 참조 방식과 반대 방향의 실패다.
+
+**복사 전 검토 시 볼 것** — `session-restore.sh` 는 세션 시작마다 `~/claude-config` 에
+**`git fetch` 를 한 번 돈다**(`timeout 5`, 실패 시 조용히 통과). 네트워크를 건드리는 유일한
+훅이므로, 그 동작을 원하지 않는 기계에서는 해당 블록을 지우고 복사한다.
 
 ⚠️ 주의:
 - **`jq`가 없는 기계가 있다.** 훅 예제 대부분이 jq를 쓰므로 `python3`로 대체했다.
