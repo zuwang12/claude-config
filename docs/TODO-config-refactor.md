@@ -105,9 +105,9 @@ claude-config/
 
 | 기계 | 결과 |
 |---|---|
-| mac-c | 6개 파일 전부 로드. cwd `~/claude-config` 에서도 중복 적재 없음 |
+| mac | 6개 파일 전부 로드. cwd `~/claude-config` 에서도 중복 적재 없음 |
 | dell | pull 후 `rules/workflow.md` 로드 확인 |
-| ubuntu-b | 미확인 (pull 미실시) |
+| mlai | 미확인 (pull 미실시) |
 | 춘 | 미확인 (pull 미실시) |
 
 ⚠️ **오진 주의** — dell 첫 시도에서 `workflow.md` 문항만 "모름"이 나왔는데,
@@ -129,7 +129,7 @@ grep에 `@~/claude-config/CLAUDE.md` import 줄만 나오면 할 일이 없다. 
 가리키는 줄(`claude-config 4절 참조` 등)이 있으면 파일명 표기로 바꾼다
 (예: `rules/workflow.md` 「조사 규율」). 이 파일은 git 밖이라 기계마다 수동이다.
 
-- mac-c: 수정 완료
+- mac: 수정 완료
 - dell: 해당 줄 없음(확인 완료). 할 일 없음
 
 ### 1-b. 「규칙 후보 수집함」 절을 어디에 둘 것인가
@@ -168,7 +168,7 @@ inbox를 읽고 `rules/`로 승격시킨다. WORKLOG(append-only) 패턴을 conf
 
 **미확인**: 춘 기계에 Git Bash가 있는지 확인되지 않았다. 없으면 `.sh` 훅이
 안 돌고 PowerShell 버전이 따로 필요하다(`shell: "powershell"` 옵션 존재).
-ubuntu-b·mac-c의 `jq`/python 버전도 미확인.
+mlai·mac의 `jq`/python 버전도 미확인.
 
 ---
 
@@ -222,4 +222,4 @@ ubuntu-b·mac-c의 `jq`/python 버전도 미확인.
 (`--dry-run` 으로 먼저 볼 수 있다). 여전히 미확인인 것:
 
 - **춘**: Git Bash 유무. 없으면 `.sh` 훅이 안 돌고 PowerShell 버전이 필요하다
-- **ubuntu-b / mac-c**: python3 유무만 확인하면 된다(`jq`는 안 쓴다)
+- **mlai / mac**: python3 유무만 확인하면 된다(`jq`는 안 쓴다)

@@ -5,8 +5,8 @@
 | 환경 | OS | 위치 |
 |---|---|---|
 | 춘 | Windows | 로컬 |
-| ubuntu-b | Ubuntu | 서버 |
-| mac-c | macOS | 로컬 |
+| mlai | Ubuntu | 서버 |
+| mac | macOS | 로컬 |
 | dell | Ubuntu | 사외망 |
 
 ## 설계 원칙
