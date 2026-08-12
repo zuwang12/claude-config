@@ -2,12 +2,16 @@
 
 4개 환경에서 동일한 Claude Code 전역 지침을 쓰기 위한 리포.
 
-| 환경 | OS | 위치 |
-|---|---|---|
-| 춘 | Windows | 로컬 |
-| mlai | Ubuntu | 서버 |
-| mac | macOS | 로컬 |
-| dell | Ubuntu | 사외망 |
+| 환경 | OS | 위치 | 쓰기 |
+|---|---|---|---|
+| 춘 | Windows | 로컬 | **pull 전용** |
+| mlai | Ubuntu | 서버 | 편집·push |
+| mac | macOS | 로컬 | 편집·push |
+| dell | Ubuntu | 사외망 | 편집·push |
+
+**`춘`은 pull 전용이다.** 규칙 텍스트만 받아 쓰고 이 기계에서는 push 하지 않는다.
+정책상 그렇게 정했고, 의지가 아니라 설정으로 막는다 — `remote set-url --push origin DISABLED` ·
+태그 고정 · 세션 훅 미등록. 절차는 [docs/reclone-2026-08-13.md](docs/reclone-2026-08-13.md) §4.
 
 ## 설계 원칙
 
