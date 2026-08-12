@@ -1,6 +1,6 @@
 # config 구조 개편 — 다음 세션 작업 목록
 
-작성: 2026-08-06 / 작성 세션: `[srv-a] CLAUDE.md 모델 선정 기준`
+작성: 2026-08-06 / 작성 세션: `[dell] CLAUDE.md 모델 선정 기준`
 
 이 문서는 **미완료 작업 인계용**이다. 규칙 자체는 `CLAUDE.md`에 있고 여기에는 없다.
 완료되면 이 파일을 지운다.
@@ -106,11 +106,11 @@ claude-config/
 | 기계 | 결과 |
 |---|---|
 | mac-c | 6개 파일 전부 로드. cwd `~/claude-config` 에서도 중복 적재 없음 |
-| srv-a | pull 후 `rules/workflow.md` 로드 확인 |
+| dell | pull 후 `rules/workflow.md` 로드 확인 |
 | ubuntu-b | 미확인 (pull 미실시) |
-| win-a | 미확인 (pull 미실시) |
+| 춘 | 미확인 (pull 미실시) |
 
-⚠️ **오진 주의** — srv-a 첫 시도에서 `workflow.md` 문항만 "모름"이 나왔는데,
+⚠️ **오진 주의** — dell 첫 시도에서 `workflow.md` 문항만 "모름"이 나왔는데,
 원인은 import 실패가 아니라 **체크아웃이 `c2d26d0`에 머물러 있던 것**이었다.
 그 내용은 더 나중 커밋(`d3a5a5e`)에서 들어온 것이라 파일에 아예 없었다.
 **검증 질문은 대상 파일의 오래된 내용으로 고를 것.** 최근 추가분으로 물으면
@@ -130,7 +130,7 @@ grep에 `@~/claude-config/CLAUDE.md` import 줄만 나오면 할 일이 없다. 
 (예: `rules/workflow.md` 「조사 규율」). 이 파일은 git 밖이라 기계마다 수동이다.
 
 - mac-c: 수정 완료
-- srv-a: 해당 줄 없음(확인 완료). 할 일 없음
+- dell: 해당 줄 없음(확인 완료). 할 일 없음
 
 ### 1-b. 「규칙 후보 수집함」 절을 어디에 둘 것인가
 
@@ -166,7 +166,7 @@ inbox를 읽고 `rules/`로 승격시킨다. WORKLOG(append-only) 패턴을 conf
 스크립트로 만든다. python3로 기존 JSON을 읽어 병합한다. **기존 키를 덮어쓰면 안 된다**
 (permissions 등이 날아간다).
 
-**미확인**: win-a 기계에 Git Bash가 있는지 확인되지 않았다. 없으면 `.sh` 훅이
+**미확인**: 춘 기계에 Git Bash가 있는지 확인되지 않았다. 없으면 `.sh` 훅이
 안 돌고 PowerShell 버전이 따로 필요하다(`shell: "powershell"` 옵션 존재).
 ubuntu-b·mac-c의 `jq`/python 버전도 미확인.
 
@@ -221,5 +221,5 @@ ubuntu-b·mac-c의 `jq`/python 버전도 미확인.
 새 기계에서는 `bash ~/claude-config/install.sh` 한 줄이면 훅 등록이 끝난다
 (`--dry-run` 으로 먼저 볼 수 있다). 여전히 미확인인 것:
 
-- **win-a**: Git Bash 유무. 없으면 `.sh` 훅이 안 돌고 PowerShell 버전이 필요하다
+- **춘**: Git Bash 유무. 없으면 `.sh` 훅이 안 돌고 PowerShell 버전이 필요하다
 - **ubuntu-b / mac-c**: python3 유무만 확인하면 된다(`jq`는 안 쓴다)

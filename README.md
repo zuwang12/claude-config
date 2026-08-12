@@ -4,10 +4,10 @@
 
 | 환경 | OS | 위치 |
 |---|---|---|
-| 회사 | Windows | 로컬 |
+| 춘 | Windows | 로컬 |
 | ubuntu-b | Ubuntu | 서버 |
 | mac-c | macOS | 로컬 |
-| srv-a | Ubuntu | 사내망 |
+| dell | Ubuntu | 사외망 |
 
 ## 설계 원칙
 

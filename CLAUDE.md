@@ -2,7 +2,7 @@
 
 > 이 파일의 원본은 `~/claude-config/CLAUDE.md`(git 관리)이며,
 > 각 기계의 `~/.claude/CLAUDE.md`가 `@~/claude-config/CLAUDE.md`로 import한다.
-> 4개 환경(win-a / ubuntu-b / mac-c / srv-a)에서 동일하게 동작한다.
+> 4개 환경(춘 / ubuntu-b / mac-c / dell)에서 동일하게 동작한다.
 >
 > **규칙 본문은 `rules/` 아래에 있고 이 파일은 import 목록이다.** 기계 4대·동시 세션
 > 여러 개가 한 파일을 고쳐 쓰다 충돌이 반복돼 2026-08-08에 분할했다. 규칙을 고칠 때는
