@@ -1,11 +1,12 @@
 # claude-config
 
-4개 환경에서 동일한 Claude Code 전역 지침을 쓰기 위한 리포.
+5개 환경에서 동일한 Claude Code 전역 지침을 쓰기 위한 리포.
 
 | 환경 | OS | 위치 | 쓰기 |
 |---|---|---|---|
 | 춘 | Windows | 로컬 | **pull 전용** |
-| mlai | Ubuntu | 서버 | 편집·push |
+| mlai39 | Ubuntu | 서버 | 편집·push |
+| mlai40 | Ubuntu | 서버 | 편집·push |
 | mac | macOS | 로컬 | 편집·push |
 | dell | Ubuntu | 사외망 | 편집·push |
 
@@ -29,7 +30,7 @@
 "Fable은 장문 컨텍스트가 강점" 근거가 낡아 있었다(Opus와 컨텍스트가 동일해짐).
 대신 `CLAUDE.md`는 스킬을 *호출하는 규칙*만 담고, 값은 매번 스킬에서 읽는다.
 
-## 설치 (4대 공통)
+## 설치 (5대 공통)
 
 public 리포이므로 **인증이 필요 없다.** 토큰도 `gh`도 SSH 키도 쓰지 않는다.
 
@@ -142,7 +143,7 @@ clone 해 둔 기계라면 `git -C ~/claude-config pull` 도 같다.
 
 다음 세션부터 반영된다. 자동화하려면 `SessionStart` 훅에 걸 수 있으나,
 **사내망 서버처럼 외부 접근이 막힌 환경에서는 세션 시작이 지연되거나 실패할 수 있다.**
-4대 중 한 곳이라도 GitHub 접근이 막히면 수동 갱신을 권한다.
+5대 중 한 곳이라도 GitHub 접근이 막히면 수동 갱신을 권한다.
 raw.githubusercontent.com 도 막혀 있으면 파일 하나뿐이니 복사해 붙여넣어도 된다.
 
 ## 수정할 때
